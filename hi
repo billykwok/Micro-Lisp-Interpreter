@@ -1,0 +1,48 @@
+(define list-size
+  (lambda (l)
+    (if (null? l)
+	0
+	(+ (list-size (cdr l)) 1))))
+
+(define list-partition-true
+  (lambda (p l)
+    (if (null? l)
+	l
+	(if (p (car l))
+	    (cons (car l) (list-partition-true p (cdr l)))
+	    (list-partition-true p (cdr l))))))
+
+(define list-partition-false
+  (lambda (p l)
+    (if (null? l)
+	l
+	(if (p (car l))
+	    (list-partition-false p (cdr l))
+	    (cons (car l) (list-partition-false p (cdr l)))))))
+
+(define list-partition
+  (lambda (p l)
+    (define t (list-partition-true p l))
+    (define f (list-partition-false p l))
+    (if (null? t)
+	(if (null? f)
+	    (append (quote (())) (quote (())))
+	    (append (quote (())) (cons f (quote ()))))
+	(if (null? f)
+	    (append (cons t (quote ())) (quote (())))
+	    (append (cons t (quote ())) (cons f (quote ())))))))
+	    
+(define list-sort
+  (lambda (p l)
+    (define partition-by-pivot
+      (lambda (l)
+	(list-partition (p (list-ref l (/ (list-size l) 2)) l) l)))
+    (if (list? l)
+	(if (< (list-size l) 2)
+	    l
+	    (append (list-sort p (car (partition-by-pivot l)))
+		    (append (cons pivot (quote()))
+			    (list-sort p (car (cdr (partition-by-pivot l))))))))))
+
+(define l (list 5 6 3 4 1 2))
+(list-sort (lambda (a) (< a 4)) l)
